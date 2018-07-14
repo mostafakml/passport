@@ -2,6 +2,7 @@
 
 namespace Laravel\Passport\Guards;
 
+use App\User;
 use Exception;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
@@ -112,13 +113,14 @@ class TokenGuard
             // associated with the token. We will use the provider implementation which may
             // be used to retrieve users from Eloquent. Next, we'll be ready to continue.
             $user =\Illuminate\Support\Facades\Redis::hget('users',$psr->getAttribute('oauth_user_id'));
-            if ($user)
-                $user = json_decode($user);
+              if ($user)
+            {
+                $user =new User((array)json_decode($user));
 
+            }
+            else
+                $user = $this->provider->retrieveById($psr->getAttribute('oauth_user_id'));
 
-            if (!$user)
-                $user = $this->provider->retrieveById($psr->getAttribute('oauth_user_id')
-                );
 
 
 
