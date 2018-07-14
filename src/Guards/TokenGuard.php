@@ -112,9 +112,13 @@ class TokenGuard
             // associated with the token. We will use the provider implementation which may
             // be used to retrieve users from Eloquent. Next, we'll be ready to continue.
             $user =\Illuminate\Support\Facades\Redis::hget('users',$psr->getAttribute('oauth_user_id'));
+            if ($user)
+                $user = json_decode($user);
+
 
             if (!$user)
-                $user = $this->provider->retrieveById($psr->getAttribute('oauth_user_id'));
+                $user = $this->provider->retrieveById($psr->getAttribute('oauth_user_id')
+                );
 
 
 
@@ -125,6 +129,7 @@ class TokenGuard
             // Next, we will assign a token instance to this user which the developers may use
             // to determine if the token has a given scope, etc. This will be useful during
             // authorization such as within the developer's Laravel model policy classes.
+
             $token = $this->tokens->find(
                 $psr->getAttribute('oauth_access_token_id')
             );
