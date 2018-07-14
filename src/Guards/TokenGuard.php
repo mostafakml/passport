@@ -111,9 +111,12 @@ class TokenGuard
             // If the access token is valid we will retrieve the user according to the user ID
             // associated with the token. We will use the provider implementation which may
             // be used to retrieve users from Eloquent. Next, we'll be ready to continue.
-            $user = $this->provider->retrieveById(
-                $psr->getAttribute('oauth_user_id')
-            );
+            $user =\Illuminate\Support\Facades\Redis::hget('users',$psr->getAttribute('oauth_user_id'));
+
+            if (!$user)
+                $user = $this->provider->retrieveById($psr->getAttribute('oauth_user_id'));
+
+
 
             if (! $user) {
                 return;

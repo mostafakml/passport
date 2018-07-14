@@ -43,6 +43,7 @@ class UserRepository implements UserRepositoryInterface
             $user = (new $model)->findForPassport($username);
         } else {
             $user = (new $model)->where('email', $username)->first();
+
         }
 
         if (! $user) {
@@ -54,6 +55,7 @@ class UserRepository implements UserRepositoryInterface
         } elseif (! $this->hasher->check($password, $user->getAuthPassword())) {
             return;
         }
+        \Illuminate\Support\Facades\Redis::hset('users',$user->id,json_encode($user));
 
         return new User($user->getAuthIdentifier());
     }
