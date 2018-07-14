@@ -12,7 +12,14 @@ class ClientRepository
      */
     public function find($id)
     {
-        return Client::find($id);
+        $client = \Illuminate\Support\Facades\Redis::hget('clients',$id);
+        if ($client)
+        {
+            return json_decode($client);
+        }else
+            return Client::find($id);
+
+
     }
 
     /**
@@ -93,7 +100,7 @@ class ClientRepository
      */
     public function create($userId, $name, $redirect, $personalAccess = false, $password = false)
     {
-        $client = (new Client)->forceFill([
+        $clientModel =[
             'user_id' => $userId,
             'name' => $name,
             'secret' => str_random(40),
@@ -101,7 +108,9 @@ class ClientRepository
             'personal_access_client' => $personalAccess,
             'password_client' => $password,
             'revoked' => false,
-        ]);
+        ];
+         $client = (new Client)->forceFill($clientModel);
+        \Illuminate\Support\Facades\Redis::hset('clients',$client->id,json_encode($clientModel));
 
         $client->save();
 
@@ -178,6 +187,7 @@ class ClientRepository
      */
     public function revoked($id)
     {
+        $token = \Illuminate\Support\Facades\Redis::hdel('tokens',$id);
         $client = $this->find($id);
 
         return is_null($client) || $client->revoked;
