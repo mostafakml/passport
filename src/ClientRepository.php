@@ -12,12 +12,17 @@ class ClientRepository
      */
     public function find($id)
     {
+
         $client = \Illuminate\Support\Facades\Redis::hget('clients',$id);
         if ($client)
         {
             return json_decode($client);
         }else
-            return Client::find($id);
+        {
+            $client =Client::find($id);
+            \Illuminate\Support\Facades\Redis::hset('clients',$client->id,json_encode($client));
+            return $client;
+        }
 
 
     }
@@ -30,6 +35,7 @@ class ClientRepository
      */
     public function findActive($id)
     {
+        dd
         $client = $this->find($id);
 
         return $client && ! $client->revoked ? $client : null;
