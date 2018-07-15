@@ -35,7 +35,7 @@ class ClientRepository
      */
     public function findActive($id)
     {
-        dd
+        
         $client = $this->find($id);
 
         return $client && ! $client->revoked ? $client : null;
