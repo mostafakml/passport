@@ -27,9 +27,10 @@ class TokenRepository
      */
     public function find($id)
     {
-        $token = \Illuminate\Support\Facades\Redis::hget('tokens',$id);
+        $token =\Illuminate\Support\Facades\Redis::hget('tokens',$id);
+
         if ($token)
-            return json_decode($token);
+            return new Token((array)json_decode($token));
         else
             return Token::find($id);
     }
@@ -92,6 +93,7 @@ class TokenRepository
      */
     public function revokeAccessToken($id)
     {
+        \Illuminate\Support\Facades\Redis::hdel('tokens',$id);
         return Token::where('id', $id)->update(['revoked' => true]);
     }
 

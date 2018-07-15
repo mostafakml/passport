@@ -16,7 +16,7 @@ class ClientRepository
         $client = \Illuminate\Support\Facades\Redis::hget('clients',$id);
         if ($client)
         {
-            return json_decode($client);
+            return new Client((array)json_decode($client));
         }else
         {
             $client =Client::find($id);
@@ -193,7 +193,6 @@ class ClientRepository
      */
     public function revoked($id)
     {
-        $token = \Illuminate\Support\Facades\Redis::hdel('tokens',$id);
         $client = $this->find($id);
 
         return is_null($client) || $client->revoked;
@@ -210,5 +209,7 @@ class ClientRepository
         $client->tokens()->update(['revoked' => true]);
 
         $client->forceFill(['revoked' => true])->save();
+        \Illuminate\Support\Facades\Redis::hdel('clients',$client->id);
+
     }
 }
