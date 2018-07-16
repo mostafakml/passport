@@ -15,7 +15,6 @@ class TokenRepository
      */
     public function create($attributes)
     {
-        \Illuminate\Support\Facades\Redis::hset('tokens',$attributes['id'],json_encode($attributes));
         return Token::create($attributes);
     }
 
@@ -32,7 +31,13 @@ class TokenRepository
         if ($token)
             return new Token(json_decode($token,true));
         else
-            return Token::find($id);
+        {
+            $token = Token::find($id);
+            \Illuminate\Support\Facades\Redis::hset('tokens',$id,json_encode($token,true));
+            return $token;
+
+        }
+
     }
 
     /**

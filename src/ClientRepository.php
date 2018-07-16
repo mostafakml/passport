@@ -116,8 +116,6 @@ class ClientRepository
             'revoked' => false,
         ];
          $client = (new Client)->forceFill($clientModel);
-        \Illuminate\Support\Facades\Redis::hset('clients',$client->id,json_encode($clientModel));
-
         $client->save();
 
         return $client;
