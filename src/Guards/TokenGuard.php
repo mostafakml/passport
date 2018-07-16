@@ -115,7 +115,7 @@ class TokenGuard
             $user =\Illuminate\Support\Facades\Redis::hget('users',$psr->getAttribute('oauth_user_id'));
               if ($user)
             {
-                $user =new User((array)json_decode($user));
+                $user =new User(json_decode($user,true));
 
             }
             else

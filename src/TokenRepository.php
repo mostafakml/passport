@@ -30,7 +30,7 @@ class TokenRepository
         $token =\Illuminate\Support\Facades\Redis::hget('tokens',$id);
 
         if ($token)
-            return new Token((array)json_decode($token));
+            return new Token(json_decode($token,true));
         else
             return Token::find($id);
     }

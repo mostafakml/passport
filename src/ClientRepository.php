@@ -16,7 +16,7 @@ class ClientRepository
         $client = \Illuminate\Support\Facades\Redis::hget('clients',$id);
         if ($client)
         {
-            return new Client((array)json_decode($client));
+            return new Client(json_decode($client,true));
         }else
         {
             $client =Client::find($id);
@@ -35,7 +35,7 @@ class ClientRepository
      */
     public function findActive($id)
     {
-        
+
         $client = $this->find($id);
 
         return $client && ! $client->revoked ? $client : null;
