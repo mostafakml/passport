@@ -19,8 +19,12 @@ class ClientRepository
             return new Client(json_decode($client,true));
         }else
         {
+
             $client =Client::find($id);
-            \Illuminate\Support\Facades\Redis::hset('clients',$client->id,json_encode($client));
+            $clientCache = json_encode($client);
+            $clientCache=json_decode($clientCache);
+            $clientCache->secret=$client->secret;
+            \Illuminate\Support\Facades\Redis::hset('clients',$client->id,json_encode($clientCache));
             return $client;
         }
 
