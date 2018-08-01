@@ -2,7 +2,7 @@
 
 namespace Laravel\Passport\Guards;
 
-use App\User;
+use App\Models\User;
 use Exception;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
@@ -115,6 +115,17 @@ class TokenGuard
             $user =\Illuminate\Support\Facades\Redis::hget('users',$psr->getAttribute('oauth_user_id'));
               if ($user)
             {
+                $provider = config('auth.guards.api.provider');
+
+                if (is_null($model = config('auth.providers.'.$provider.'.model'))) {
+                    throw new RuntimeException('Unable to determine authentication model from configuration.');
+                }
+
+
+
+                $user = (new $model(json_decode($user,true)));
+
+
                 $user =new User(json_decode($user,true));
 
             }
