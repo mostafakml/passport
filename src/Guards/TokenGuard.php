@@ -112,27 +112,19 @@ class TokenGuard
             // If the access token is valid we will retrieve the user according to the user ID
             // associated with the token. We will use the provider implementation which may
             // be used to retrieve users from Eloquent. Next, we'll be ready to continue.
-            $user =\Illuminate\Support\Facades\Redis::hget('users',$psr->getAttribute('oauth_user_id'));
-              if ($user)
-            {
-                $provider = config('auth.guards.api.provider');
+            $provider = config('auth.guards.api.provider');
 
-                if (is_null($model = config('auth.providers.'.$provider.'.model'))) {
-                    throw new RuntimeException('Unable to determine authentication model from configuration.');
-                }
-
-
-
-                $user = (new $model(json_decode($user,true)));
-
-
-                $user =new User(json_decode($user,true));
-
+            if (is_null($model = config('auth.providers.'.$provider.'.model'))) {
+                throw new RuntimeException('Unable to determine authentication model from configuration.');
             }
-            else
-                $user = $this->provider->retrieveById($psr->getAttribute('oauth_user_id'));
 
-
+            if (method_exists($model, 'retrieveFromCache')) {
+                $user = (new $model)->retrieveFromCache($psr->getAttribute('oauth_user_id'));
+            } else {
+                $user = $this->provider->retrieveById(
+                    $psr->getAttribute('oauth_user_id')
+                );
+            }
 
 
             if (! $user) {
