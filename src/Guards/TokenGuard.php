@@ -16,6 +16,8 @@ use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Psy\Exception\RuntimeException;
+
 
 class TokenGuard
 {
@@ -111,9 +113,19 @@ class TokenGuard
             // If the access token is valid we will retrieve the user according to the user ID
             // associated with the token. We will use the provider implementation which may
             // be used to retrieve users from Eloquent. Next, we'll be ready to continue.
-            $user = $this->provider->retrieveById(
-                $psr->getAttribute('oauth_user_id')
-            );
+            $provider = config('auth.guards.api.provider');
+
+            if (is_null($model = config('auth.providers.'.$provider.'.model'))) {
+                throw new RuntimeException('Unable to determine authentication model from configuration.');
+            }
+
+            if (method_exists($model, 'retrieveFromCache')) {
+                $user = (new $model)->retrieveFromCache($psr->getAttribute('oauth_user_id'));
+            } else {
+                $user = $this->provider->retrieveById(
+                    $psr->getAttribute('oauth_user_id')
+                );
+            }
 
             if (! $user) {
                 return;
